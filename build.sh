@@ -152,14 +152,13 @@ if [ "$WITH_VPN" -eq 1 ]; then
   cp -R "$PRODUCTS/PacketTunnel.appex" "$APP/PlugIns/"
 fi
 
-# CODE_SIGNING_ALLOWED=NO не вшивает entitlements, а TrollStore берёт их
-# только из бинарника. Вшиваем вручную для устройства.
 if [ "$WITH_VPN" -eq 1 ] && [ "$SIMULATOR" -eq 0 ]; then
   command -v ldid >/dev/null 2>&1 || { echo "ldid not found (brew install ldid)" >&2; exit 1; }
-  ldid -S"$ROOT/ios/TgWsProxy/TgWsProxyVPN.entitlements" "$APP/TgWsProxy"
-  ldid -S"$ROOT/ios/PacketTunnel/PacketTunnel.entitlements" \
-       "$APP/PlugIns/PacketTunnel.appex/PacketTunnel"
-  for BIN in "$APP/TgWsProxy" "$APP/PlugIns/PacketTunnel.appex/PacketTunnel"; do
+  APP_BIN="$APP/TgWsProxy"
+  APPEX_BIN="$APP/PlugIns/PacketTunnel.appex/PacketTunnel"
+  ldid -S"$ROOT/ios/TgWsProxy/TgWsProxyVPN.entitlements" "$APP_BIN"
+  ldid -S"$ROOT/ios/PacketTunnel/PacketTunnel.entitlements" "$APPEX_BIN"
+  for BIN in "$APP_BIN" "$APPEX_BIN"; do
     ldid -e "$BIN" | grep -q packet-tunnel-provider \
       || { echo "entitlements missing in $BIN" >&2; exit 1; }
   done
