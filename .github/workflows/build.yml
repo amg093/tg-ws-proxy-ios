@@ -42,7 +42,7 @@ jobs:
           # через CoreLocation.
           - name: free
             flags: ""
-          # С Network Extension: нужен profile с packet-tunnel-provider.
+          # Network Extension: entitlements вшиваются через ldid (для TrollStore).
           - name: vpn
             flags: "--vpn"
     steps:
@@ -51,6 +51,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-ios
+
+      - name: Install ldid
+        if: matrix.name == 'vpn'
+        run: brew install ldid
 
       - name: Build IPA
         run: ./build.sh ${{ matrix.flags }}
